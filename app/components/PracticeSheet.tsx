@@ -21,7 +21,9 @@ export default function PracticeSheet({
         {[...Array(repetitions)].map((_, idx) => (
           <div key={idx} className="relative" style={{ minHeight: "60px" }}>
             <p
-              ref={(el) => (textRefs.current[idx] = el)}
+              ref={(el) => {
+                textRefs.current[idx] = el;
+              }}
               style={{
                 margin: 0,
                 fontSize: `${fontSize}px`,
