@@ -1,124 +1,126 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
+import { useState, useRef } from "react";
+import { Printer } from "lucide-react";
+import SettingsPanel from "./components/SettingsPanel";
+import PracticeSheet from "./components/PracticeSheet";
+import { lineStyles } from "./components/LineStyles";
+import { textColors } from "./components/TextColors";
+import useFontLoader from "./components/useFontLoader";
+import useLinePositions from "./components/useLinePositions";
 
 export default function HandwritingPractice() {
   const [text, setText] = useState(
     "The quick brown fox jumps over the lazy dog."
   );
-  const [fontLoaded, setFontLoaded] = useState(false);
-  const pdfRef = useRef(null);
+  const [repetitions, setRepetitions] = useState(4);
+  const [fontSize, setFontSize] = useState(24);
+  const [textOpacity, setTextOpacity] = useState(10);
+  const [lineStyle, setLineStyle] = useState("classic");
+  const [textColor, setTextColor] = useState("#1f2937");
+  const [showSettings, setShowSettings] = useState(true);
 
-  // Google Font 로드
-  useEffect(() => {
-    const link = document.createElement("link");
-    link.href = "https://fonts.googleapis.com/css2?family=Allura&display=swap";
-    link.rel = "stylesheet";
-    document.head.appendChild(link);
+  const pdfRef = useRef<HTMLDivElement>(null);
+  const textRefs = useRef<(HTMLParagraphElement | null)[]>([]);
 
-    // 폰트 로딩 완료 대기
-    if (document.fonts) {
-      document.fonts.ready.then(() => {
-        setFontLoaded(true);
-      });
-    } else {
-      // 폴백: 일정 시간 대기
-      setTimeout(() => setFontLoaded(true), 1000);
-    }
+  const fontLoaded = useFontLoader(
+    "https://fonts.googleapis.com/css2?family=Allura&display=swap"
+  );
+  const linePositions = useLinePositions(
+    fontLoaded,
+    textRefs,
+    text,
+    fontSize,
+    repetitions
+  );
 
-    return () => {
-      document.head.removeChild(link);
-    };
-  }, []);
-
-  const generatePDF = async () => {
-    const input = pdfRef.current;
-    if (!input) return;
-
-    // 폰트 로딩 대기
-    if (document.fonts) {
-      await document.fonts.ready;
-    }
-
-    // 약간의 추가 대기 시간
-    await new Promise((resolve) => setTimeout(resolve, 100));
-
-    html2canvas(input, {
-      scale: 2,
-      useCORS: true,
-      logging: false,
-    }).then((canvas) => {
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF("p", "mm", "a4");
-      const imgWidth = pdf.internal.pageSize.getWidth();
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-      pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
-      pdf.save("handwriting_practice.pdf");
-    });
+  const printPage = () => {
+    setShowSettings(false);
+    setTimeout(() => {
+      window.print();
+      setShowSettings(true);
+    }, 100);
   };
 
-  return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-8 bg-gray-50">
-      <h1 className="text-3xl font-bold mb-6">
-        ✍️ Handwriting Practice Generator
-      </h1>
-      <textarea
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        rows={3}
-        className="w-full max-w-lg p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        placeholder="Enter your text here..."
-      />
-      <button
-        onClick={generatePDF}
-        className="mt-4 px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-        disabled={!fontLoaded}
-      >
-        {fontLoaded ? "Generate PDF" : "Loading Font..."}
-      </button>
+  const currentLineStyle = lineStyles[lineStyle];
 
-      <div
-        ref={pdfRef}
-        className="mt-10 w-full max-w-lg border-t border-gray-300 pt-6 bg-white p-8"
-        style={{ fontFamily: "Allura, cursive" }}
-      >
-        <h2
-          className="text-xl font-semibold mb-4"
-          style={{ fontFamily: "sans-serif" }}
-        >
-          Preview
-        </h2>
-        <div className="relative">
-          <div className="space-y-8">
-            {[...Array(4)].map((_, idx) => (
-              <div
-                key={idx}
-                className="relative h-24 border-b-2 border-gray-400"
-              >
-                {/* 가이드라인 */}
-                <div className="absolute inset-0 flex flex-col">
-                  <div className="h-1/3 border-b border-gray-200"></div>
-                  <div className="h-1/3 border-b border-dashed border-gray-300"></div>
-                  <div className="h-1/3"></div>
-                </div>
-                {/* 글씨 */}
-                <div className="absolute inset-0 flex items-center justify-start pl-2">
-                  <p
-                    className="text-3xl"
-                    style={{
-                      fontFamily: "Allura, cursive",
-                      lineHeight: "6rem",
-                      transform: "translateY(-0.5rem)",
-                    }}
-                  >
-                    {text}
-                  </p>
-                </div>
-              </div>
-            ))}
+  return (
+    <main className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 md:p-8 print:bg-white print:p-0">
+      <style jsx global>{`
+        @media screen {
+          .practice-container {
+            width: 210mm;
+            min-height: 297mm;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+          }
+        }
+        @media print {
+          .no-print {
+            display: none !important;
+          }
+          main {
+            padding: 0 !important;
+            background: white !important;
+          }
+          body {
+            background: white !important;
+          }
+          .practice-container {
+            max-width: 100% !important;
+            border: none !important;
+            box-shadow: none !important;
+            padding: 20px !important;
+            width: 210mm;
+            min-height: 297mm;
+          }
+        }
+      `}</style>
+
+      <div className="max-w-6xl mx-auto">
+        <div className="no-print mb-8 text-center">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+            ✍️ Handwriting Practice Generator
+          </h1>
+          <p className="text-gray-600">
+            Create custom practice sheets with your preferred style
+          </p>
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-6">
+          {showSettings && (
+            <div className="no-print lg:w-1/3">
+              <SettingsPanel
+                text={text}
+                setText={setText}
+                repetitions={repetitions}
+                setRepetitions={setRepetitions}
+                fontSize={fontSize}
+                setFontSize={setFontSize}
+                textOpacity={textOpacity}
+                setTextOpacity={setTextOpacity}
+                lineStyle={lineStyle}
+                setLineStyle={setLineStyle}
+                textColor={textColor}
+                setTextColor={setTextColor}
+                fontLoaded={fontLoaded}
+                printPage={printPage}
+              />
+            </div>
+          )}
+
+          <div className={`${showSettings ? "lg:w-2/3" : "w-full"}`}>
+            <PracticeSheet
+              pdfRef={pdfRef}
+              textRefs={textRefs}
+              text={text}
+              repetitions={repetitions}
+              fontSize={fontSize}
+              textOpacity={textOpacity}
+              textColor={textColor}
+              linePositions={linePositions}
+              currentLineStyle={currentLineStyle}
+            />
           </div>
         </div>
       </div>
