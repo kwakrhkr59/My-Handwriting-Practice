@@ -1,0 +1,54 @@
+# Node modules
+node_modules/
+
+# Build output
+.next/
+out/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment variables
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# VSCode settings
+.vscode/
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Dependency directories
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Optional: ignore swc cache
+.swc/
+
+# Optional: ignore coverage reports (if using Jest, etc.)
+coverage/
+
+# Optional: ignore TypeScript build output
+dist/
+*.tsbuildinfo
+
+# Optional: Next.js analytics and telemetry
+.next/trace
+.next/analyze
+
+# Optional: ignore Firebase / Vercel / Netlify settings (if not using)
+.firebase/
+.vercel/
+.netlify/
+
+# Ignore playgrounds or temporary files
+*.local
+*.log
+*.tmp
