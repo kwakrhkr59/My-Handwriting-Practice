@@ -34,7 +34,3 @@ npm run dev
 - **줄 스타일 추가**: [`app/components/LineStyles.ts`](app/components/LineStyles.ts)에서 lineStyles 객체에 새로운 스타일을 추가할 수 있습니다.
 - **텍스트 색상 추가**: [`app/components/TextColors.ts`](app/components/TextColors.ts)에서 textColors 배열에 원하는 색상을 추가하세요.
 - **폰트 변경**: [`app/globals.css`](app/globals.css) 및 [`app/components/useFontLoader.ts`](app/components/useFontLoader.ts)에서 Google Fonts 링크를 수정하세요.
-
-## 라이선스
-
-이 프로젝트는 [MIT 라이선스](LICENSE)를 따릅니다. 자유롭게 사용, 수정, 배포할 수 있습니다.
