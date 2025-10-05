@@ -1,0 +1,7 @@
+{
+  "name": "Node.js 18 Environment",
+  "image": "mcr.microsoft.com/vscode/devcontainers/javascript-node:0-18", 
+  "features": {
+    "nodejs": "18"
+  }
+}
